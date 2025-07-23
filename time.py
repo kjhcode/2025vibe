@@ -17,7 +17,6 @@ def init_session_state():
         "diary_entries": {},
         "start_time": None,
         "running": False,
-        "last_update": None,
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -74,34 +73,4 @@ if st.session_state.reward_categories:
     for cat, rewards in st.session_state.reward_categories.items():
         st.markdown(f"**🗂️ {cat}**")
         for r in rewards:
-            st.write(f"• {r}")
-
-st.header("🏆 보상 뽑기")
-if completed == total and total > 0:
-    cat_list = list(st.session_state.reward_categories.keys())
-    if cat_list:
-        selected_cat = st.selectbox("보상 카테고리 선택", cat_list)
-        if st.button("🎲 보상 뽑기"):
-            pool = st.session_state.reward_categories[selected_cat]
-            if pool:
-                st.session_state.selected_reward = random.choice(pool)
-    else:
-        st.info("보상 카테고리를 먼저 등록하세요.")
-else:
-    st.info("체크리스트를 모두 완료해야 보상을 뽑을 수 있어요.")
-
-if st.session_state.selected_reward:
-    st.success(f"🎉 오늘의 보상: **{st.session_state.selected_reward}**")
-
-# ----------------------------
-# ✅ 25분 타이머 (rerun 제거, 안전 버전)
-# ----------------------------
-st.header("⏱ 25분 집중 타이머")
-
-TIMER_DURATION = 25 * 60  # 25분
-
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("▶️ 타이머 시작"):
-        st.session_state.start_time = time.time()
-        st.session
+            s
