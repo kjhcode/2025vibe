@@ -100,6 +100,15 @@ if st.session_state.selected_reward:
 # ----------------------------
 # ✅ 25분 타이머 (버그 수정됨)
 # ----------------------------
+
+from streamlit_autorefresh import st_autorefresh
+
+# 매초 자동 새로고침
+st_autorefresh(interval=1000, key="refresh")
+
+
+
+
 st.header("⏱ 25분 집중 타이머")
 
 TIMER_DURATION = 25 * 60  # 25분
@@ -119,9 +128,8 @@ if st.button("⏹️ 타이머 중단"):
 timer_placeholder = st.empty()
 progress_placeholder = st.empty()
 
-if st.session_state.running:
-    current_time = time.time()
-    elapsed = int(current_time - st.session_state.start_time)
+if st.session_state.get("running", False):
+    elapsed = int(time.time() - st.session_state.start_time)
     remaining = TIMER_DURATION - elapsed
 
     if remaining <= 0:
@@ -129,13 +137,13 @@ if st.session_state.running:
         st.session_state.running = False
     else:
         mins, secs = divmod(remaining, 60)
-        timer_placeholder.subheader(f"{mins:02d}:{secs:02d} 남음")
+        st.subheader(f"{mins:02d}:{secs:02d} 남음")
         st.progress((TIMER_DURATION - remaining) / TIMER_DURATION)
-        time.sleep(1)
-        st.experimental_rerun()
+
+        # rerun 대신 사용자가 수동으로 새로고침하거나 외부 자동 리프레시 도구 사용
+        st.write("⏱ 1초마다 수동 새로고침 또는 자동 리프레시 도구 필요")
 else:
     st.write("버튼을 눌러 타이머를 시작하세요.")
-
 # ----------------------------
 # ✅ 일기 기능
 # ----------------------------
