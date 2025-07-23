@@ -143,4 +143,4 @@ if st.button("💾 일기 저장"):
         st.session_state.diary_entries[today] = diary
         st.success("일기가 저장되었습니다.")
     else:
-        st.error("❗️일기 저장에 문제가 발생했습니다
+        st.error("일기 저장에 문제가 발생했습니다")
