@@ -73,4 +73,75 @@ if st.session_state.reward_categories:
     for cat, rewards in st.session_state.reward_categories.items():
         st.markdown(f"**🗂️ {cat}**")
         for r in rewards:
-            s
+            st.write(f"• {r}")
+
+st.header("🏆 보상 뽑기")
+if completed == total and total > 0:
+    cat_list = list(st.session_state.reward_categories.keys())
+    if cat_list:
+        selected_cat = st.selectbox("보상 카테고리 선택", cat_list)
+        if st.button("🎲 보상 뽑기"):
+            pool = st.session_state.reward_categories[selected_cat]
+            if pool:
+                st.session_state.selected_reward = random.choice(pool)
+    else:
+        st.info("보상 카테고리를 먼저 등록하세요.")
+else:
+    st.info("체크리스트를 모두 완료해야 보상을 뽑을 수 있어요.")
+
+if st.session_state.selected_reward:
+    st.success(f"🎉 오늘의 보상: **{st.session_state.selected_reward}**")
+
+# ----------------------------
+# ✅ 25분 타이머 (간단 안전 버전)
+# ----------------------------
+st.header("⏱ 25분 집중 타이머")
+
+TIMER_DURATION = 25 * 60  # 25분
+
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("▶️ 타이머 시작"):
+        st.session_state.start_time = time.time()
+        st.session_state.running = True
+with col2:
+    if st.button("⏹️ 타이머 중단"):
+        st.session_state.running = False
+
+if st.session_state.running and st.session_state.start_time:
+    elapsed = int(time.time() - st.session_state.start_time)
+    remaining = TIMER_DURATION - elapsed
+
+    if remaining <= 0:
+        st.success("⏰ 25분이 끝났어요! 잠시 쉬어가요 🍅")
+        st.session_state.running = False
+    else:
+        mins, secs = divmod(remaining, 60)
+        st.subheader(f"⏳ {mins:02d}:{secs:02d} 남음")
+        st.progress((TIMER_DURATION - remaining) / TIMER_DURATION)
+        st.info("페이지를 수동으로 새로고침해야 남은 시간이 갱신돼요.")
+else:
+    st.write("버튼을 눌러 타이머를 시작하세요.")
+
+# ----------------------------
+# ✅ 일기 기능
+# ----------------------------
+st.header("📝 오늘의 일기")
+
+today = datetime.date.today().isoformat()
+default_text = st.session_state.diary_entries.get(today, "")
+diary = st.text_area("오늘 하루 어땠나요?", value=default_text, height=200)
+
+if st.button("💾 일기 저장"):
+    if isinstance(st.session_state.diary_entries, dict):
+        st.session_state.diary_entries[today] = diary
+        st.success("일기가 저장되었습니다.")
+    else:
+        st.error("일기 저장에 문제가 발생했습니다.")
+
+if st.session_state.diary_entries:
+    st.subheader("📚 이전 일기 보기")
+    dates = sorted(st.session_state.diary_entries.keys(), reverse=True)
+    selected = st.selectbox("날짜 선택", dates)
+    saved = st.session_state.diary_entries.get(selected, "")
+    st.text_area("📖 저장된 일기", value=saved, height=200, disabled=True)
