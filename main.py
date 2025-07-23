@@ -1,53 +1,54 @@
 import streamlit as st
 import random
+import time
 import pandas as pd
 
-# Sample lunch menu
-menu_data = [
-    {"name": "Bibimbap", "type": "Korean", "diet": "vegetarian"},
-    {"name": "Kimchi Stew", "type": "Korean", "diet": "regular"},
-    {"name": "Sushi", "type": "Japanese", "diet": "regular"},
-    {"name": "Tempura Udon", "type": "Japanese", "diet": "vegetarian"},
-    {"name": "Burger", "type": "Western", "diet": "regular"},
-    {"name": "Caesar Salad", "type": "Western", "diet": "vegetarian"},
-    {"name": "Pad Thai", "type": "Thai", "diet": "vegetarian"},
-    {"name": "Green Curry", "type": "Thai", "diet": "regular"},
-    {"name": "Vegan Burrito", "type": "Mexican", "diet": "vegan"},
-    {"name": "Beef Tacos", "type": "Mexican", "diet": "regular"},
-]
+st.set_page_config(page_title="Lunch Roulette 🎯", page_icon="🍽")
 
-menu_df = pd.DataFrame(menu_data)
+st.title("🎯 Lunch Roulette")
+st.subheader("Can't decide what to eat? Spin the wheel!")
 
-# App title
-st.title("🥢 What Should I Eat for Lunch?")
-st.write("Feeling indecisive? Let me help you pick a lunch menu!")
+st.markdown("👉 **Step 1:** Enter your lunch options below:")
 
-# User input: Cuisine type
-cuisine = st.multiselect(
-    "Pick your preferred cuisine(s):",
-    options=menu_df["type"].unique(),
-    default=menu_df["type"].unique().tolist()
-)
+# Input section
+with st.form("menu_input_form"):
+    menu_text = st.text_area(
+        "Enter one menu item per line. Optionally add calories and price separated by commas.\n\n"
+        "**Example:** `Bibimbap, 550, 8000`",
+        height=200,
+        placeholder="Bibimbap, 550, 8000\nKimchi Stew, 600, 8500\nSushi"
+    )
+    submitted = st.form_submit_button("✅ Submit Menu")
 
-# User input: Dietary preference
-diet = st.selectbox(
-    "Select your dietary preference:",
-    options=["any", "regular", "vegetarian", "vegan"]
-)
+# Parse menu
+menu_items = []
+if submitted or menu_text:
+    for line in menu_text.strip().splitlines():
+        parts = [p.strip() for p in line.split(",")]
+        if len(parts) == 1:
+            menu_items.append({"name": parts[0], "calories": None, "price": None})
+        elif len(parts) == 2:
+            menu_items.append({"name": parts[0], "calories": parts[1], "price": None})
+        else:
+            menu_items.append({"name": parts[0], "calories": parts[1], "price": parts[2]})
 
-# Filter menu based on user input
-filtered_menu = menu_df[menu_df["type"].isin(cuisine)]
-if diet != "any":
-    filtered_menu = filtered_menu[filtered_menu["diet"] == diet]
+# Convert to DataFrame
+if menu_items:
+    df = pd.DataFrame(menu_items)
+    st.markdown("📋 **Your Menu:**")
+    st.dataframe(df)
 
-# Suggestion
-if st.button("🎲 Suggest Lunch"):
-    if not filtered_menu.empty:
-        choice = random.choice(filtered_menu["name"].tolist())
-        st.success(f"How about **{choice}**?")
-    else:
-        st.error("No menu matches your criteria. Try adjusting your filters!")
-
-# Show full menu (optional)
-with st.expander("📋 View Full Menu"):
-    st.dataframe(menu_df)
+    # Spin button
+    if st.button("🎰 Spin the Roulette!"):
+        with st.spinner("Spinning the wheel... 🎡"):
+            for _ in range(10):
+                random_item = random.choice(menu_items)
+                st.markdown(f"### 👉 {random_item['name']}")
+                time.sleep(0.2)
+            final_choice = random.choice(menu_items)
+            st.success("🎉 Your lunch today is:")
+            st.markdown(f"## 🥢 **{final_choice['name']}**")
+            if final_choice["calories"]:
+                st.markdown(f"- 🔥 Calories: {final_choice['calories']} kcal")
+            if final_choice["price"]:
+                st.markdown(f"- 💸 Price: ₩{int(final_choice['price']):,}")
