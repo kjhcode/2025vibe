@@ -15,17 +15,15 @@ def init_session_state():
         "reward_categories": {},
         "selected_reward": None,
         "diary_entries": {},
-        "timer_running": False,
         "start_time": None,
-        "paused": False,
-        "elapsed": 0,
         "running": False,
+        "paused": False,
     }
     for key, val in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = val
 
-    # 안전성 강화
+    # 안정성 보장
     if not isinstance(st.session_state.diary_entries, dict):
         st.session_state.diary_entries = {}
 
@@ -74,7 +72,7 @@ with st.form("reward_form_section"):
         st.session_state.reward_categories.setdefault(category, []).append(reward)
         st.success("보상이 추가되었습니다!")
 
-# 등록된 보상 출력
+# 보상 목록 출력
 if st.session_state.reward_categories:
     for cat, rewards in st.session_state.reward_categories.items():
         st.markdown(f"**🗂️ {cat}**")
@@ -100,31 +98,40 @@ if st.session_state.selected_reward:
     st.success(f"🎉 오늘의 보상: **{st.session_state.selected_reward}**")
 
 # ----------------------------
-# ✅ 25분 타이머
+# ✅ 25분 타이머 (버그 수정됨)
 # ----------------------------
 st.header("⏱ 25분 집중 타이머")
 
+TIMER_DURATION = 25 * 60  # 25분
+
+# 타이머 시작
 if st.button("▶️ 타이머 시작"):
     st.session_state.start_time = time.time()
     st.session_state.running = True
+    st.session_state.paused = False
 
+# 타이머 중단
 if st.button("⏹️ 타이머 중단"):
     st.session_state.running = False
+    st.session_state.paused = True
 
-total_seconds = 25 * 60
+# 타이머 UI 출력
+timer_placeholder = st.empty()
 
 if st.session_state.running:
-    elapsed = int(time.time() - st.session_state.start_time)
-    remaining = total_seconds - elapsed
+    current_time = time.time()
+    elapsed = int(current_time - st.session_state.start_time)
+    remaining = TIMER_DURATION - elapsed
 
     if remaining <= 0:
         st.success("⏰ 25분이 끝났어요! 잠시 쉬어가요 🍅")
         st.session_state.running = False
     else:
         mins, secs = divmod(remaining, 60)
-        st.subheader(f"{mins:02d}:{secs:02d} 남음")
-        st.progress((total_seconds - remaining) / total_seconds)
-        st.rerun()
+        timer_placeholder.subheader(f"{mins:02d}:{secs:02d} 남음")
+        st.progress((TIMER_DURATION - remaining) / TIMER_DURATION)
+        time.sleep(1)
+        st.experimental_rerun()
 else:
     st.write("버튼을 눌러 타이머를 시작하세요.")
 
