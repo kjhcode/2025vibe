@@ -3,7 +3,6 @@ import time
 import random
 import hashlib
 import datetime
-from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(page_title="미루지 말자!", layout="centered")
 
@@ -22,7 +21,6 @@ def init_session_state():
     for key, val in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = val
-
     if not isinstance(st.session_state.diary_entries, dict):
         st.session_state.diary_entries = {}
 
@@ -95,13 +93,12 @@ if st.session_state.selected_reward:
     st.success(f"🎉 오늘의 보상: **{st.session_state.selected_reward}**")
 
 # ----------------------------
-# ✅ 25분 타이머 (자동 새로고침 + 안전한 조건 확인)
+# ✅ 25분 타이머 (autorefresh 없이 안전하게)
 # ----------------------------
 st.header("⏱ 25분 집중 타이머")
 
-TIMER_DURATION = 25 * 60  # 25분
+TIMER_DURATION = 25 * 60
 
-# 버튼 컨트롤은 항상 상단에 위치
 col1, col2 = st.columns(2)
 with col1:
     if st.button("▶️ 타이머 시작"):
@@ -111,11 +108,7 @@ with col2:
     if st.button("⏹️ 타이머 중단"):
         st.session_state.running = False
 
-# 타이머 실행 중이면 자동 새로고침
-if st.session_state.running:
-    st_autorefresh(interval=1000, limit=None, key="autorefresh_timer")
-
-# 타이머 상태 출력
+# 타이머 상태 표시
 if st.session_state.running and st.session_state.start_time:
     elapsed = int(time.time() - st.session_state.start_time)
     remaining = TIMER_DURATION - elapsed
@@ -127,6 +120,8 @@ if st.session_state.running and st.session_state.start_time:
         mins, secs = divmod(remaining, 60)
         st.subheader(f"⏳ {mins:02d}:{secs:02d} 남음")
         st.progress((TIMER_DURATION - remaining) / TIMER_DURATION)
+        time.sleep(1)
+        st.experimental_rerun()
 else:
     st.write("버튼을 눌러 타이머를 시작하세요.")
 
