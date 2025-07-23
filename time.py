@@ -108,15 +108,16 @@ TIMER_DURATION = 25 * 60  # 25분
 if st.button("▶️ 타이머 시작"):
     st.session_state.start_time = time.time()
     st.session_state.running = True
-    st.session_state.paused = False
+    
 
 # 타이머 중단
 if st.button("⏹️ 타이머 중단"):
     st.session_state.running = False
-    st.session_state.paused = True
+    
 
-# 타이머 UI 출력
+# 타이머 영역 확보
 timer_placeholder = st.empty()
+progress_placeholder = st.empty()
 
 if st.session_state.running:
     current_time = time.time()
