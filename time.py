@@ -93,11 +93,11 @@ if st.session_state.selected_reward:
     st.success(f"🎉 오늘의 보상: **{st.session_state.selected_reward}**")
 
 # ----------------------------
-# ✅ 25분 타이머 (autorefresh 없이 안전하게)
+# ✅ 25분 타이머 (자동 갱신 없이 안전하게)
 # ----------------------------
 st.header("⏱ 25분 집중 타이머")
 
-TIMER_DURATION = 25 * 60
+TIMER_DURATION = 25 * 60  # 25분
 
 col1, col2 = st.columns(2)
 with col1:
@@ -108,7 +108,7 @@ with col2:
     if st.button("⏹️ 타이머 중단"):
         st.session_state.running = False
 
-# 타이머 상태 표시
+# 타이머 출력
 if st.session_state.running and st.session_state.start_time:
     elapsed = int(time.time() - st.session_state.start_time)
     remaining = TIMER_DURATION - elapsed
